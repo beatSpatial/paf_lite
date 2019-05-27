@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <form method="get">
+    {{ filter.form.as_p }}
+      <label for="id_phase">Phase:</label>
+      <select id="id_phase">
+        {% for phase in phases %}
+      <option value="{{ phase.pk }}" >{{phase}}</option>
+      {% endfor %}
+    </select>
+    <br>
+    <button type="submit">Search</button>
+  </form>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th rowspan="2">
+                Total Marks received by:
+                </th>
+                <th rowspan="2">
+                    PAF
+                </th>
+                <th rowspan="2">
+                    SAPA
+                </th>
+                <th colspan="{{ cs }}">
+                    Individual vs Average
+                </th>
+            </tr>
+            <tr>
+                {% for student in students %}
+                <td>
+                    {{ student }}
+                </td>
+                {% endfor %}
+            </tr>
+
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>
+                    {{ student }}
+                </td>
+                <td>
+                    {{ student.paf }}
+                </td>
+                <td>
+                    {{ student.sapa }}
+                </td>
+                    {% for ratio in student.ratios %}
+                    <td>
+                        {{ ratio }}
+                    </td>
+                    {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+
+    </table>
+
+
+{% endblock %}
