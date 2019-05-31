@@ -5,7 +5,7 @@
 <br>
 {% block phase %}
 {% endblock %}
-<div class="input-group mb-3 col-md-6">
+<div class="input-group mb-3 col-md-3">
   <input id="pass" type="password" class="form-control" placeholder="Password">
   <div id="js-team-options" js-get-team-options-url="{% url 'get-team-options' %}" class="input-group-append">
     <button id="team" class="btn btn-outline-secondary" type="button">Get Team Members</button>
@@ -14,10 +14,16 @@
 </div>
 
 <br>
-<hr>
-<div class="input-group col-md-6">
-    <div class="slider sleep" id="slider" js-get-team-alloc-url="{% url 'set-team-alloc' %}"></div>
-    <button id="assess" type="button" class="btn btn-primary btn-block btn-lg">Allocate proportions</button>
+<br>
+
+<div class="input-group col-md-10">
+    <div class="col-md-10">
+        <div class="slider sleep" id="slider" js-get-team-alloc-url="{% url 'set-team-alloc' %}"></div>
+    </div>
+    <div class="col-md-2">
+        <button id="assess" type="button" class="btn btn-primary">Allocate proportions</button>
+    </div>
+
 </div>
 
 <div id="js-results"></div>

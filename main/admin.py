@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CSVUpload, Student, Rating, ClassTeam, ClassNo
+from .models import CSVUpload, Student, Rating, ClassTeam, ClassNo, Phase
 from django.forms.models import BaseInlineFormSet
 
 
@@ -50,3 +50,4 @@ admin.site.register(ClassTeam, ClassTeamAdmin)
 admin.site.register(CSVUpload)
 admin.site.register(Rating, RatingAdmin)
 admin.site.register(ClassNo)
+admin.site.register(Phase)

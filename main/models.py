@@ -80,6 +80,10 @@ class ClassNo(models.Model):
 class ClassTeam(models.Model):
     team_letter = models.CharField('Team', max_length=1, choices=TEAM_CHOICES, null=True, blank=True)
     class_no = models.ForeignKey(ClassNo, on_delete=models.CASCADE, blank=True, null=True)
+    limit = models.PositiveSmallIntegerField(
+        default=15,
+        validators=[MaxValueValidator(5), MinValueValidator(30)]
+    )
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=['team_letter', 'class_no'], name='unique_team'), ]
@@ -92,12 +96,20 @@ class ClassTeam(models.Model):
 
 def sapa_calc(ss, ts, ns):
     # self score, total score & number of scores
-    return "{0:.2f}".format(ss / ((ts - ss) / (ns - 1)))
-
+    # Getting back None from ss causing an exception
+    try:
+        return "{0:.2f}".format(ss / ((ts - ss) / (ns - 1)))
+    except ZeroDivisionError:
+        return "{0:.2f}".format(1)
 
 def paf_calc(ts, ntm, ns):
     # total score, no of team members, no of scores
     return "{0:.2f}".format((ts / 100) * (ntm / ns))
+
+
+# TODO Decorator experiment
+def get_score_from_rating(func, *args, **kwargs):
+    return
 
 
 def get_score(student, allocator, phase):
@@ -108,22 +120,47 @@ def get_score(student, allocator, phase):
         student=student,
         allocator=allocator,
         phase=phase,
-        use=True
-    ).latest().allocation
-    return score
+    ).latest()
+
+    if score.use:
+        return score.allocation
+    else:
+        return None
+
+
+def get_raw_rating(student, allocator, phase):
+    phase = Phase.objects.get(phase=phase)
+    rating = Rating.objects.filter(
+        student=student,
+        allocator=allocator,
+        phase=phase,
+    ).latest()
+
+    return rating
 
 
 def get_team_scores(student, phase='PP'):
 
+    # a queryset of team members
     team_members = Student.objects.filter(class_team=student.class_team)
-
     no_team_members = len(team_members)
-    # Just those scores that are counted
     score_list = list(filter(None, [get_score(student, member, phase) for member in team_members]))
-
     no_scores = len(score_list)
     total_score = sum(score_list)
     return total_score, no_team_members, no_scores
+
+
+def get_limit(self, tm, limit):
+    self_score = get_score(self, self, 'PP')
+    if self_score is None:
+        return False
+    else:
+        total_score, _, no_scores = get_team_scores(tm, 'PP')
+        # probs
+
+        ratio = sapa_calc(self_score, total_score, no_scores)
+
+        return abs(float(ratio) - 1.00) > (float(limit/100))
 
 
 class Student(models.Model):
@@ -156,42 +193,68 @@ class Student(models.Model):
 
         if self.class_team.team_letter is not None:
 
+            print("I want paf for", self)
+            # Get team score adds the scores from other team members
             total_score, no_team_members, no_scores = get_team_scores(self, phase)
+            print('total score:', total_score,
+                  'No. of team members:', no_team_members,
+                  'No, of scores:', no_scores)
             try:
+                # total score, no_team_members, no_scores
                 return paf_calc(total_score, no_team_members, no_scores)
+
             except ZeroDivisionError:
                 return None
         else:
             return None
 
     def sapa(self, phase='PP'):
-
         if self.class_team.team_letter is not None:
             total_score, _, no_scores = get_team_scores(self, phase)
+
             self_score = get_score(self, self, phase)
-            try:
-                try:
-                    return sapa_calc(self_score, total_score, no_scores)
-                except TypeError:
-                    return None
-            except ZeroDivisionError:
-                return None
-        else:
-            return None
+            # Self score is not being used
+            if self_score is not None:
+                return sapa_calc(self_score, total_score, no_scores)
+            else:
+                return "SA not Justified"
 
     def ratios(self):
         class_team = self.class_team
-        self_score = get_score(self, self, 'PP')
-        team_members = Student.objects.filter(class_team=class_team)
+        limit = class_team.limit
 
+        team_members = Student.objects.filter(class_team=class_team)
+        total_score, _, no_scores = get_team_scores(self, 'PP')
         collector = []
         for tm in team_members:
+            self_score = get_score(self, tm, 'PP')
 
-            total_score, _, no_scores = get_team_scores(tm, 'PP')
-            ratio = sapa_calc(self_score, total_score, no_scores)
-            collector.append(ratio)
+            if self_score is not None:
+                ratio = sapa_calc(self_score, total_score, no_scores)
+            else:
+                ratio = ""
+            try:
+                collector.append((ratio, abs(float(ratio) - 1.00) > (float(limit/100))))
+            except ValueError:
+                # "ratio is "SA not Justified" so
+                collector.append((ratio, False))
 
         return collector
+
+    def raw_score(self):
+        """
+
+        :return: A list of tuples.
+         tuple with index 0 is the score given regardless of whether it is used or not,
+         and a Bool indicating whether the score exceeds the limit
+        """
+
+        class_team = self.class_team
+        team_members = Student.objects.filter(class_team=class_team)
+        limit = class_team.limit
+
+        return [(get_raw_rating(self, team_member, 'PP'),
+                 get_limit(self, team_member, limit)) for team_member in team_members]
 
     def __str__(self):
         return f"{self.surname}, {self.given_name} {'({})'.format(self.pref_name) if self.pref_name is not None else ''}"

@@ -2,6 +2,12 @@
 
 /* slider widget */
 
+/* Supress pointer events */
+#slider { pointer-events: none; }
+/* Enable pointer events for slider handle only */
+#slider .ui-slider-handle { pointer-events: auto; }
+
+
 .ui-slider {
   text-decoration: none !important;
 }
@@ -144,4 +150,10 @@
 }
 .slider span.ui-slider-tooltip {
   width: auto;
+}
+
+.poo {
+    background-color: yellow;
+    /*color: #FFFFFF;*/
+    font-weight: bold;
 }

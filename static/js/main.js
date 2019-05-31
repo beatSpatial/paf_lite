@@ -4,11 +4,10 @@ $(function(){
     // create handles
     $('#slider').slider({
         // set min and maximum values
-        // day hours in this example
+
         min: 0,
         max: 10,
         // step
-        // quarter of an hour in this example
         step: 0.25,
         // range
         range: false,
@@ -23,10 +22,15 @@ $(function(){
         //mainClass: "27k",// 'the myself student',
         // slide callback
         slide: function(e, ui) {
-          console.log(e, ui);
+          console.log(e, ui)
         },
         // handle clicked callback
         handleActivated: function(event, handle) {
+
+            if(handle.index == 0){
+                console.log(event);
+
+            }
           // get select element
           var select = $(this).parent().find('.slider-controller select');
           // set selected option
@@ -47,6 +51,11 @@ $(function(){
       dataType: 'json',
       success: function(result){
         createSlider(result[0], result[1])
+        $("a[data-value='0']").on('mousedown', function(e){
+
+            e.stopImmediatePropagation();
+            return false;
+        })
       },
       error : function(xhr, errmsg, err) {
 
@@ -59,7 +68,6 @@ $(function(){
       }
     })
   };
-
 
     $('#team').click(function(){
         var pword = $('#pass').val()
@@ -97,15 +105,11 @@ $(function(){
     }
   };
 
-
-
-
   // when clicking on handler
   $(document).on('click', '.slider a', function() {
     var select = $('.slider-controller select');
     // enable if disabled
     //select.attr('disabled', false);
-    alert($(this).attr('data-type'));
     select.val($(this).attr('data-type'));
     /*if ($(this).parent().find('a.ui-state-active').length)
       $(this).toggleClass('ui-state-active');*/
@@ -138,21 +142,45 @@ $(function(){
     })
   });
 
-  $("#id_country").change(function () {
-      var url = $("#personForm").attr("data-cities-url");  // get the url of the `load_cities` view
-      var countryId = $(this).val();  // get the selected country ID from the HTML input
+  $('input[type="checkbox"]').change(function(){
+    // Processing only those that match the name attribute of the currently clicked button...
+    //$('input[name="' + $(this).attr('name') + '"]').not($(this)).trigger('deselect');
 
-      $.ajax({                       // initialize an AJAX request
-        url: url,                    // set the url of the request (= localhost:8000/hr/ajax/load-cities/)
-        data: {
-          'country': countryId       // add the country id to the GET parameters
-        },
-        success: function (data) {   // `data` is the return of the `load_cities` view function
-          $("#id_city").html(data);  // replace the contents of the city input with the data that came from the server
-        }
-      });
+    // TODO sillyscores to a button
+    if($(this).attr('name') == 'sillyscores'){
 
+        // Get student id with which to locate their allocations
+        var studentId = $(this).attr('id');
+        var phase = $("select#js-phase option:checked").val();
+        // get url from dom
+        var url = $("#alloc").attr("toggle-total-alloc-url")
+        $.ajax({
+            url: url,
+            data: {
+                'pk': studentId,
+                'phase': phase
+            },
+            success: function(data) {
+                window.location.reload()
+            }
+        })
+    } else {
+        var ratingId = $(this).attr('id');
+        var url = $("#alloc").attr("toggle-single-alloc-url")
+        $.ajax({
+            url: url,
+            data: {
+                'pk': ratingId,
+            },
+            success: function(data) {
+                window.location.reload()
+            }
+
+        })
+    }
     });
 
- 
+
+
+
 });

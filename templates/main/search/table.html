@@ -1,0 +1,112 @@
+
+<label for="limit">Limit:</label>
+      <input id="limit" type="number" min="5" max="30" value="15">
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th colspan="3">
+                Total Marks received by:
+                </th>
+
+                <th id="alloc"
+                    toggle-total-alloc-url="{% url 'toggle-total-alloc' %}"
+                    toggle-single-alloc-url="{% url 'toggle-single-alloc' %}"
+                    colspan="{{ cs }}">
+                    Total Marks received from:
+                </th>
+                <th colspan="{{ cs }}">
+                    Individual vs Average
+                </th>
+            </tr>
+            <tr>
+                <th rowspan="2"></th>
+                <th rowspan="2">
+                    PAF
+                </th>
+                <th rowspan="2">
+                    SAPA
+                </th>
+                {% for student in students %}
+                <td colspan="2">
+                    {{ student }}
+                </td>
+                {% endfor %}
+                    {% for student in students %}
+                    <td rowspan="2">
+                        {{ student }}
+                    </td>
+                {% endfor %}
+            </tr>
+            <tr>
+                {% for student in students %}
+                    <td colspan="2">
+                        <div class="form-group" >
+                            <input type="checkbox"
+                                   data-on="Use all" data-off="Discard all"
+                                   data-offstyle="danger"
+                                   data-toggle="toggle"
+                                   name="sillyscores"
+                                   id="{{ student.pk}}" checked>
+
+                        </div>
+                    </td>
+                {% endfor %}
+            </tr>
+
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>
+                    {{ student }}
+                </td>
+                <td>
+                    {{ student.paf }}
+                </td>
+                <td>
+                    {{ student.sapa }}
+                </td>
+                    {% for rating in student.raw_score %}
+                        {% if rating.1 %}
+                            <td class="poo">
+                        {% else %}
+                            <td>
+                        {% endif %}
+                        <div class="form-group">
+                            <input
+                            type="checkbox"
+                            data-toggle="toggle"
+                            data-on="Use" data-off="Discard"
+                            data-offstyle="danger"
+                            id="{{ rating.0.pk }}"
+                            {% if rating.0.use %}
+                                checked>
+                            {% endif %}
+
+                        </div>
+                    </td>
+                     {% if rating.1 %}
+                        <td class="poo">
+                    {% else %}
+                        <td>
+                    {% endif %}
+                       <label class="checkbox-inline" for="{{ rating.0.pk }}">
+                            {{ rating.0.allocation }}
+                        </label>
+                    </td>
+                    {% endfor %}
+                    {% for ratio in student.ratios %}
+                    {% if ratio.1 %}
+                        <td class="poo">
+                    {% else %}
+                        <td>
+                    {% endif %}
+                        {{ ratio.0 }}
+                    </td>
+                    {% endfor %}
+            </tr>
+          {% endfor %}
+        </tbody>
+
+    </table>
