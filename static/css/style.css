@@ -99,7 +99,7 @@
   float: left;
 }
 .slider.sleep {
-  background: #a3e5f4;
+  background: #ffffff;
 }
 .slider-controller {
   padding-top: 0;
@@ -107,7 +107,56 @@
 .slider-controller select {
   width: 100px;
 }
-
+.ui-slider-handle.minimum,
+a[data-temperature="minimum"],
+.ui-slider-range.minimum {
+  background: #a3e5f4;
+}
+.ui-slider-handle.saving,
+a[data-temperature="saving"],
+.ui-slider-range.saving {
+  background: #f2e079;
+}
+.ui-slider-handle,
+a[data-temperature="comfort"],
+.ui-slider-range.comfort {
+  background: #e6a235;
+}
+.ui-slider-handle.index0,
+a[data-temperature="index0"],
+.ui-slider-range.index0
+ {
+  background: #a3e5f4;
+}
+.ui-slider-handle.index1,
+a[data-temperature="index1"],
+.ui-slider-range.index1 {
+  background: #f2e079;
+}
+.ui-slider-handle.index2,
+a[data-temperature="index2"],
+.ui-slider-range.index2 {
+  background: #e6a235;
+}
+.ui-slider-handle.index3,
+a[data-temperature="index3"],
+.ui-slider-range.index3 {
+  background: #ffffff;
+}
+.temperature-wake {
+  background-color: #e96223;
+  color: #fff;
+}
+.temperature-leave {
+  background-color: #f2e079;
+}
+.temperature-return {
+  background-color: #e6a235;
+  color: #fff;
+}
+.temperature-sleep {
+  background-color: #a3e5f4;
+}
 .temperatures input {
   text-align: right;
 }
@@ -157,3 +206,4 @@
     /*color: #FFFFFF;*/
     font-weight: bold;
 }
+

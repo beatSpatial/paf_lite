@@ -83,56 +83,6 @@
                 + ' ui-widget-content'
                 + ' ui-corner-all');
 
-            // only when one range present
-            /*this.range = $([]);
-            if (o.range) {
-                // add range wrapper
-                this.range = $('<div></div>');
-                if (o.range === true) {
-                    if (!o.values) o.values = [this._valueMin(), this._valueMin()];
-                    if (o.values.length && o.values.length < 2) {
-                        o.values = [o.values[0], o.values[0]];
-                    }
-                }
-                // append to slider
-                this.range
-                .appendTo(this.element)
-                .addClass("ui-slider-range");
-
-                if (o.range == "min" || o.range == "max") {
-                    this.range.addClass("ui-slider-range-" + o.range);
-                }
-
-                // note: this isn't the most fittingly semantic framework class for this element,
-                // but worked best visually with a variety of themes
-                this.range.addClass("ui-widget-header");
-            }*/
-            /*
-            // add handles for present values
-            if (o.values && o.values.length) {
-                o.ranges = new Array();
-                while ($(".ui-slider-handle", this.element).length < o.values.length) {
-                    $('<a href="#"></a>')
-                    .appendTo(this.element)
-                    .addClass("ui-slider-handle");
-                    var range = $('<div></div>');
-                    range
-                    .appendTo(this.element)
-                    .addClass("ui-slider-range").addClass("ui-widget-header");
-                    o.ranges.push(range);
-                }
-            }
-            **/
-
-
-
-            // add base handler
-            /*
-            if ($(".ui-slider-handle", this.element).length == 0)
-                $('<a href="#"></a>')
-                .appendTo(this.element)
-                .addClass("ui-slider-handle");
-            */
             // create handles
             this._refreshHandles();
 
@@ -178,12 +128,12 @@
                 if ((i / o.ticks.tickMain) % 1 === 0) {
                     $('<span class="slider-tick-mark-main"></span>').css('left', (spacing * i) +  '%').appendTo(tickWapper);
                     if (o.ticks.tickShowLabelMain)
-                        $('<span class="slider-tick-mark-main-text">' + i + '</span>').css('left', (spacing * i) +  '%').appendTo(tickWapper);
+                        $('<span class="slider-tick-mark-main-text">' + i*10 + '</span>').css('left', (spacing * i) +  '%').appendTo(tickWapper);
                 }
                 else {
                     $('<span class="slider-tick-mark-side"></span>').css('left', (spacing * i) +  '%').appendTo(tickWapper);
                     if (o.ticks.tickShowLabelSide)
-                        $('<span class="slider-tick-mark-side-text">' + i + '</span>').css('left', (spacing * i) +  '%').appendTo(tickWapper);
+                        $('<span class="slider-tick-mark-side-text">' + i*10 + '</span>').css('left', (spacing * i) +  '%').appendTo(tickWapper);
                 }
 
             }
@@ -257,7 +207,6 @@
                 });
             }
 
-
             this.handles = $('a.ui-slider-handle', this.element);
 
             this.handle = this.handles.eq(0);
@@ -268,7 +217,6 @@
                 // activate handle
                 self._activateHandle($(this).attr('data-id'));
 
-            //$(this).addClass('ui-state-active');
             })
             .hover(function() {
                 $(this).addClass('ui-state-hover');
@@ -468,9 +416,7 @@
                 });
             }
 
-            // workaround for bug #3736 (if both handles of a range are at 0,
-            // the first is always used as the one with least distance,
-            // and moving it is obviously prevented by preventing negative ranges)
+
             if(o.range === true && this.values(1) === o.min) {
                 closestHandle = $(this.handles[++index]);
             }
@@ -480,13 +426,6 @@
             self._handleIndex = index;
 
             this._activateHandle($(closestHandle).attr('data-id'));
-
-            // remove active class for all handles
-            /*this.handles.removeClass('ui-state-active');
-            // add to closest handle
-            closestHandle
-            .addClass('ui-state-active')
-            .focus();*/
 
             var offset = closestHandle.offset();
             var mouseOverHandle = !$(event.target).parents().andSelf().is('.ui-slider-handle');
@@ -626,11 +565,8 @@
                     if (allowed !== false) {
                         this._setData('value', newVal, ( event.type == 'mousedown' && this.options.animate ));
                     }
-
                 }
-
             }
-
         },
 
         _stop: function(event, index) {
@@ -760,71 +696,7 @@
                 var max = this._valueMax();
                 // whole range
                 var diff = this._valueMax() - this._valueMin();
-                /*if (oRange === true) {
-                    var firstHandlePercent = (this.values(0) - min) / diff * 100;
-                    var rangePercent = (this.values(numOptions-1) - min) / diff * 100 - firstHandlePercent;
-                    if (self.orientation == 'horizontal') {
-                        self.range.stop(1,1)[animate ? 'animate' : 'css']({
-                            left: firstHandlePercent + '%',
-                            width: rangePercent + '%'
-                        }, o.animate);
-                    } else {
-                        self.range.stop(1,1)[animate ? 'animate' : 'css']({
-                            bottom: firstHandlePercent + '%',
-                            height: rangePercent + '%'
-                        }, o.animate);
-                    }
-                    console.log(allHandles.eq(i+1).attr('data-value') - $(this).attr('data-value'))
-                    .ui-slider-handle.minimum,
-a[data-temperature="minimum"],
-.ui-slider-range.minimum {
-  background: #a3e5f4;
-}
-.ui-slider-handle.saving,
-a[data-temperature="saving"],
-.ui-slider-range.saving {
-  background: #f2e079;
-}
-.ui-slider-handle.comfort,
-a[data-temperature="comfort"],
-.ui-slider-range.comfort {
-  background: #e6a235;
-}
-.ui-slider-handle.sleep,
-a[data-temperature="sleep"],
-.ui-slider-range.sleep {
-  background: #a3e5f4;
-}
-.ui-slider-handle.leave,
-a[data-temperature="leave"],
-.ui-slider-range.leave {
-  background: #f2e079;
-}
-.ui-slider-handle.return,
-a[data-temperature="return"],
-.ui-slider-range.return {
-  background: #e6a235;
-}
-.ui-slider-handle.wake,
-a[data-temperature="wake"],
-.ui-slider-range.wake {
-  background: #e96223;
-}
-.temperature-wake {
-  background-color: #e96223;
-  color: #fff;
-}
-.temperature-leave {
-  background-color: #f2e079;
-}
-.temperature-return {
-  background-color: #e6a235;
-  color: #fff;
-}
-.temperature-sleep {
-  background-color: #a3e5f4;
-}
-                }*/
+
                 var allHandles = this.handles;
                 // all handles
                 this.handles.each(function(i, j) {
@@ -867,14 +739,7 @@ a[data-temperature="wake"],
                                 text += ' '+self._getTimeStringFromFloat($(this).attr('data-value')) + ' - 0:00';
                         }
                         $('.ui-slider-tooltip', this).text(text);
-                    //$('.ui-slider-tooltip', this).text(self._getTimeStringFromFloat(allHandles.eq(i-1).attr('data-value'))+' - '+self._getTimeStringFromFloat($(this).attr('data-value')));
-                    /*
-                        if (i < allHandles.length-1)
-                            $('.ui-slider-tooltip', this).text(self.values(i)+' - '+self.values(i+1));
-                        // if last show range from previous
-                        else
-                            $('.ui-slider-tooltip', this).text(self.values(i-1)+' - '+self.values(i));
-                         */
+
                     }
                 });
 
@@ -905,11 +770,6 @@ a[data-temperature="wake"],
                             height: rangePercent + '%'
                         });
                     }
-                /*
-                    $(this).removeClass('minimum');
-                    $(this).removeClass('saving');
-                    $(this).removeClass('comfort');
-                    $(this).addClass($('.ui-slider-handle:eq('+i+')', self.element).attr('data-temperature'));    */
 
                 });
             } else {

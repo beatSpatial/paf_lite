@@ -98,15 +98,14 @@ def set_team_alloc(request):
 
 
 def team_search(request):
-    team_list = ClassTeam.objects.all()
-    team_filter = TeamFilter(request.GET, queryset=team_list)
+    team_filter = TeamFilter(request.GET, queryset=ClassTeam.objects.all())
     team = team_filter.qs
     students = Student.objects.filter(class_team=team[0])
-    phases = Phase.objects.all()
 
     return render(request, 'main/search/team_list.html', {
-        'phases': phases,
+        'phases': Phase.objects.all(),
         'filter': team_filter,
+        'team': team,
         'students': students,
         'cs': len(students) * 2
     })
@@ -136,9 +135,8 @@ def toggle_off(func):
     return inner_toggle_off
 
 
-def rating(student=None, allocator=None, phase_pk=None, r_pk=None):
+def rating(student=None, allocator=None, phase=None, r_pk=None):
     if not r_pk:
-        phase = Phase.objects.get(pk=phase_pk)
         r = Rating.objects.filter(
             student=student,
             allocator=allocator,
@@ -150,32 +148,36 @@ def rating(student=None, allocator=None, phase_pk=None, r_pk=None):
 
 
 def toggle_total_alloc(request):
-    std_pk = request.GET.get('pk', '')
-    phase_pk = request.GET.get('phase', '')
 
-    phase = Phase.objects.get(pk=int(phase_pk))
-
-    student = Student.objects.get(pk=std_pk)
+    phase = Phase.objects.get(pk=int(request.GET.get('phase', '')))
+    student = Student.objects.get(pk=request.GET.get('pk', ''))
     team_members = Student.objects.filter(class_team=student.class_team)
 
+    # decorate rating
     rating_off = toggle_off(rating)
 
-    # first ever use of decorator
-    [rating_off(tm, student, phase.pk) for tm in team_members]
+    # Don't use any of the ratings
+    [rating_off(tm, student, phase) for tm in team_members]
 
-    return team_search(request)
+    #return team_search(request)
+
+    return render(request, 'main/search/table.html', {
+        'students': team_members,
+        'cs': (len(team_members) * 2)
+    })
 
 
 def toggle_single_alloc(request):
+
     # Decorate the rating function
     toggle_rating = toggle(rating)
 
     # The rating after it being toggled
     toggled_rating = toggle_rating(r_pk=request.GET.get('pk', ''))
     student = toggled_rating.student
-    students = Student.objects.filter(class_team=student.class_team)
+    team_members = Student.objects.filter(class_team=student.class_team)
 
     return render(request, 'main/search/table.html', {
-        'students': students,
-        'cs': (len(students) * 2)
+        'students': team_members,
+        'cs': (len(team_members) * 2)
     })

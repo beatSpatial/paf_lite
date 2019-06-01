@@ -1,4 +1,15 @@
 $(function(){
+    var bgClassList = [
+    'bg-primary',
+     'bg-success',
+      'bg-info',
+       'bg-warning',
+        'bg-danger',
+         'bg-secondary',
+          'bg-dark',
+           'bg-light']
+
+
       // create slider
   function createSlider(peers, peer_lookup){
     // create handles
@@ -26,17 +37,14 @@ $(function(){
         },
         // handle clicked callback
         handleActivated: function(event, handle) {
-
-            if(handle.index == 0){
-                console.log(event);
-
-            }
           // get select element
           var select = $(this).parent().find('.slider-controller select');
           // set selected option
           select.val(handle.type);
         }
       });
+
+      $("#slider .ui-slider-handle").unbind('keydown');
   };
 
   function renderTeamMembers(pword){
@@ -51,11 +59,29 @@ $(function(){
       dataType: 'json',
       success: function(result){
         createSlider(result[0], result[1])
+        // Prevents first handle moving
         $("a[data-value='0']").on('mousedown', function(e){
-
             e.stopImmediatePropagation();
             return false;
         })
+        console.log($( ".ui-slider-handle"))
+        var ranges = $( ".ui-slider-range")
+        var handles = $( ".ui-slider-handle" )
+        $.each(handles, function(i, handle){
+            console.log(i, handle)
+            let idx = i;
+            $(handle).data('temperature', 'index'+idx)
+            $(handle).addClass('index'+idx)
+        })
+
+        $.each(ranges, function(i, range){
+            console.log(i, range)
+            let idx = i;
+            $(range).data('temperature', 'index'+idx)
+            $(range).addClass('index'+idx)
+        })
+        // show the button
+        $('#assess').show()
       },
       error : function(xhr, errmsg, err) {
 
@@ -67,11 +93,16 @@ $(function(){
         console.log(xhr.status + ": " + xhr.responseText);
       }
     })
+
   };
 
     $('#team').click(function(){
         var pword = $('#pass').val()
         renderTeamMembers(pword)
+        var first = $("a[data-value='0']")
+        console.log(first)
+
+
     });
 
     // function to create slider ticks
@@ -115,6 +146,7 @@ $(function(){
       $(this).toggleClass('ui-state-active');*/
   });
 
+  $('#assess').hide()
   $('#assess').click(function() {
 
     $.ajax({
@@ -128,7 +160,8 @@ $(function(){
           },
       dataType: 'json',
       success: function(result){
-        //createSlider(result[0], result[1])
+        alert('Team member scores logged')
+        window.location.reload()
       },
       error : function(xhr, errmsg, err) {
 
