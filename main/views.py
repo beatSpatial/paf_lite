@@ -1,42 +1,23 @@
 from django.shortcuts import render
 from .models import Student, Rating, ClassTeam, Phase
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 
 from .filters import TeamFilter
-from .models import get_raw_rating
 
 import ast
 
 
-def pp(request):
-    return render(request, 'main/phases/PP.html')
-
-
-def id(request):
-    return render(request, 'main/phases/ID.html')
-
-
-def dd(request):
-    return render(request, 'main/phases/DD.html')
-
-
-def fi(request):
-    return render(request, 'main/phases/IF.html')
-
-
-def fs(request):
-    return render(request, 'main/phases/PP.html')
+def landing(request, phase):
+    # create context from request
+    context = {'phase': phase}
+    return render(request, 'main/index.html', context)
 
 
 def get_team_options(request):
     password = request.GET.get('pass', '')
-    s = Student.objects.get(password=password.upper())
-
-    class_team = s.class_team
-
+    class_team = Student.objects.get(password=password.upper()).class_team
     team_members = Student.objects.filter(class_team=class_team)
-
     starting_prop = 10.0 / len(team_members)
 
     peers = [
@@ -81,18 +62,18 @@ def set_team_alloc(request):
         student = Student.objects.get(pk=pk)
 
         try:
-            rating = create_rating(student=student,
-                                   allocator=allocator,
-                                   phase=phase,
-                                   allocation=tp(paf_alloc[i + 1][1] - score))
+            new_rating = create_rating(student=student,
+                                       allocator=allocator,
+                                       phase=phase,
+                                       allocation=tp(paf_alloc[i + 1][1] - score))
 
         except IndexError:
-            rating = create_rating(student=student,
-                                   allocator=allocator,
-                                   phase=phase,
-                                   allocation=tp(10 - score))
+            new_rating = create_rating(student=student,
+                                       allocator=allocator,
+                                       phase=phase,
+                                       allocation=tp(10 - score))
 
-        rating.save()
+        new_rating.save()
 
     return JsonResponse('cool', safe=False)
 
@@ -101,6 +82,14 @@ def team_search(request):
     team_filter = TeamFilter(request.GET, queryset=ClassTeam.objects.all())
     team = team_filter.qs
     students = Student.objects.filter(class_team=team[0])
+
+    if request.method == "POST":
+        print('post FUCK')
+        phase = request.GET.get('limit', '')
+
+    if request.method == "GET":
+        limit = request.GET.get('limit', '')
+        print(limit)
 
     return render(request, 'main/search/team_list.html', {
         'phases': Phase.objects.all(),
@@ -121,6 +110,7 @@ def toggle(func):
             r.use = True
         r.save()
         return r
+
     return inner_toggle
 
 
@@ -132,6 +122,7 @@ def toggle_off(func):
             r.use = False
             r.save()
         return r
+
     return inner_toggle_off
 
 
@@ -148,7 +139,6 @@ def rating(student=None, allocator=None, phase=None, r_pk=None):
 
 
 def toggle_total_alloc(request):
-
     phase = Phase.objects.get(pk=int(request.GET.get('phase', '')))
     student = Student.objects.get(pk=request.GET.get('pk', ''))
     team_members = Student.objects.filter(class_team=student.class_team)
@@ -159,7 +149,7 @@ def toggle_total_alloc(request):
     # Don't use any of the ratings
     [rating_off(tm, student, phase) for tm in team_members]
 
-    #return team_search(request)
+    # return team_search(request)
 
     return render(request, 'main/search/table.html', {
         'students': team_members,
@@ -168,7 +158,6 @@ def toggle_total_alloc(request):
 
 
 def toggle_single_alloc(request):
-
     # Decorate the rating function
     toggle_rating = toggle(rating)
 

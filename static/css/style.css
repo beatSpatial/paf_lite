@@ -143,6 +143,19 @@ a[data-temperature="index3"],
 .ui-slider-range.index3 {
   background: #ffffff;
 }
+
+.ui-slider-handle.index4,
+a[data-temperature="index4"],
+.ui-slider-range.index4 {
+  background: pink;
+}
+
+.ui-slider-handle.index5,
+a[data-temperature="index5"],
+.ui-slider-range.index5 {
+  background: purple;
+}
+
 .temperature-wake {
   background-color: #e96223;
   color: #fff;

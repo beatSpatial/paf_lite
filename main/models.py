@@ -102,6 +102,7 @@ def sapa_calc(ss, ts, ns):
     except ZeroDivisionError:
         return "{0:.2f}".format(1)
 
+
 def paf_calc(ts, ntm, ns):
     # total score, no of team members, no of scores
     return "{0:.2f}".format((ts / 100) * (ntm / ns))
@@ -193,12 +194,8 @@ class Student(models.Model):
 
         if self.class_team.team_letter is not None:
 
-            print("I want paf for", self)
             # Get team score adds the scores from other team members
             total_score, no_team_members, no_scores = get_team_scores(self, phase)
-            print('total score:', total_score,
-                  'No. of team members:', no_team_members,
-                  'No, of scores:', no_scores)
             try:
                 # total score, no_team_members, no_scores
                 return paf_calc(total_score, no_team_members, no_scores)

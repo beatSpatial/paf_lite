@@ -9,11 +9,10 @@
         <option value="{{ phase.pk }}" >{{ phase }}</option>
         {% endfor %}
       </select>
-
     <br>
     <button type="submit">Search</button>
     <hr>
-    <input value="{{ team.limit }}">
+    <input id="limit" value="{{ team.limit }}">
   </form>
   {% include 'main/search/table.html' %}
 
