@@ -99,9 +99,6 @@ $(function(){
     $('#team').click(function(){
         var pword = $('#pass').val()
         renderTeamMembers(pword)
-        var first = $("a[data-value='0']")
-        console.log(first)
-
 
     });
 

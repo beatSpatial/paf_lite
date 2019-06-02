@@ -16,7 +16,8 @@ def landing(request, phase):
 
 def get_team_options(request):
     password = request.GET.get('pass', '')
-    class_team = Student.objects.get(password=password.upper()).class_team
+    s = Student.objects.get(password=password.upper())
+    class_team = s.class_team
     team_members = Student.objects.filter(class_team=class_team)
     starting_prop = 10.0 / len(team_members)
 
@@ -83,18 +84,9 @@ def team_search(request):
     team = team_filter.qs
     students = Student.objects.filter(class_team=team[0])
 
-    if request.method == "POST":
-        print('post FUCK')
-        phase = request.GET.get('limit', '')
-
-    if request.method == "GET":
-        limit = request.GET.get('limit', '')
-        print(limit)
-
     return render(request, 'main/search/team_list.html', {
         'phases': Phase.objects.all(),
         'filter': team_filter,
-        'team': team,
         'students': students,
         'cs': len(students) * 2
     })
