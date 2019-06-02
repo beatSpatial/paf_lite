@@ -55,7 +55,7 @@ def set_team_alloc(request):
 
     allocator = Student.objects.get(password=password.upper())
     team_members = Student.objects.filter(class_team=allocator.class_team)
-    phase = Phase.objects.get(phase=phase)
+    phase = Phase.objects.get(phase=phase.upper())
 
     paf_alloc = list(zip([student.pk for student in team_members], alloc))
 
