@@ -35,7 +35,8 @@ if __name__ == '__main__':
 
     def populate_base_ratings(students):
 
-        for phase in ['PP', 'ID']:# 'DD', 'IF', 'FS']:
+        for phase in ['ID', 'DD']:# 'DD', 'IF', 'FS']:
+            phase = Phase.objects.get_or_create(phase=phase)[0]
             for student in students:
                 team = ClassTeam.objects.get(
                     class_no=student.class_no,
@@ -43,7 +44,7 @@ if __name__ == '__main__':
 
                 team_members = Student.objects.filter(class_team=team)
                 split = int(100/len(team_members))
-                phase = Phase.objects.get_or_create(phase=phase)[0]
+
                 for team_member in team_members:
                     r = create_rating(student, team_member, phase, split)
                     r.save()

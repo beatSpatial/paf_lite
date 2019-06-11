@@ -39,12 +39,14 @@ def tp(num):
 
 
 def create_rating(student, allocator, phase, allocation):
-    return Rating.objects.create(
+    r = Rating.objects.get_or_create(
         student=student,
         allocator=allocator,
         phase=phase,
-        allocation=allocation
-    )
+    )[0]
+
+    r.allocation = allocation
+    r.save()
 
 
 def set_team_alloc(request):
@@ -63,24 +65,21 @@ def set_team_alloc(request):
         student = Student.objects.get(pk=pk)
 
         try:
-            new_rating = create_rating(student=student,
-                                       allocator=allocator,
-                                       phase=phase,
-                                       allocation=tp(paf_alloc[i + 1][1] - score))
+            create_rating(student=student,
+                          allocator=allocator,
+                          phase=phase,
+                          allocation=tp(paf_alloc[i + 1][1] - score))
 
         except IndexError:
-            new_rating = create_rating(student=student,
-                                       allocator=allocator,
-                                       phase=phase,
-                                       allocation=tp(10 - score))
-
-        new_rating.save()
+            create_rating(student=student,
+                          allocator=allocator,
+                          phase=phase,
+                          allocation=tp(10 - score))
 
     return JsonResponse('cool', safe=False)
 
 
 def team_search(request):
-    print(request.GET)
     team_filter = TeamFilter(request.GET, queryset=ClassTeam.objects.all())
     team = team_filter.qs
     students = Student.objects.filter(class_team=team[0])
@@ -140,10 +139,12 @@ def rating(student=None, allocator=None, phase=None, r_pk=None):
             student=student,
             allocator=allocator,
             phase=phase,
-        ).latest()
+        #).latest()
+        )
     else:
         r = Rating.objects.get(pk=r_pk)
     return r
+
 
 """
 def toggle_total_alloc(request):
