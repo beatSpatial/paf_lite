@@ -12,4 +12,4 @@ team_letter = models.CharField('Team', max_length=1, choices=TEAM_CHOICES, null=
 class TeamFilter(django_filters.FilterSet):
     class Meta:
         model = ClassTeam
-        fields = ['class_no', 'team_letter', ]
+        fields = ['class_no', 'team_letter',]

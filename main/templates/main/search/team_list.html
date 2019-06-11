@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% load widget_tweaks %}
+
+{% block content %}
+<br>
+<form id="get_team" method="get" get-teams-url="{% url 'teams' %}">
+    <div class="well">
+      <h4 style="margin-top: 0">Select team to moderate:</h4>
+      <div class="row">
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.class_no.label_tag }}
+          {% render_field filter.form.class_no class="form-control" %}
+        </div>
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.team_letter.label_tag }}
+          {% render_field filter.form.team_letter class="form-control" %}
+        </div>
+
+        <div class="form-group col-sm-4 col-md-3">
+           <label for="js-phase">Phase:</label>
+            <select id="js-phase" class="form-control">
+              {% for phase_opt in phases %}
+              <option value="{{ phase_opt.pk }}" >{{ phase_opt }}</option>
+              {% endfor %}
+            </select>
+        </div>
+        <div class="form-group col-sm-4 col-md-3">
+          <label>.</label>
+          <button class="form-control" type="submit">Search</button>
+        </div>
+
+      </div>
+    </div>
+
+    <hr>
+  </form>
+  <div id="dynamic_table"></div>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+  <script src="{% static '/main/js/team.js' %}"></script>
+{% endblock %}

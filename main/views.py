@@ -80,12 +80,28 @@ def set_team_alloc(request):
 
 
 def team_search(request):
+    print(request.GET)
     team_filter = TeamFilter(request.GET, queryset=ClassTeam.objects.all())
     team = team_filter.qs
     students = Student.objects.filter(class_team=team[0])
+    # I want phase
+    print(students)
+    lu = dict(request.GET.lists())
+
+    try:
+        phase = lu['phase'][0]
+        return render(request, 'main/search/table.html', {
+            'phase': phase,
+            'students': students,
+            'cs': len(students) * 2})
+
+    except KeyError:
+        # first time through
+        phase = None
 
     return render(request, 'main/search/team_list.html', {
         'phases': Phase.objects.all(),
+        'phase': phase if phase else 1,
         'filter': team_filter,
         'students': students,
         'cs': len(students) * 2
@@ -129,9 +145,10 @@ def rating(student=None, allocator=None, phase=None, r_pk=None):
         r = Rating.objects.get(pk=r_pk)
     return r
 
-
+"""
 def toggle_total_alloc(request):
     phase = Phase.objects.get(pk=int(request.GET.get('phase', '')))
+    print(phase)
     student = Student.objects.get(pk=request.GET.get('pk', ''))
     team_members = Student.objects.filter(class_team=student.class_team)
 
@@ -145,8 +162,11 @@ def toggle_total_alloc(request):
 
     return render(request, 'main/search/table.html', {
         'students': team_members,
+        'phase': phase,
         'cs': (len(team_members) * 2)
     })
+
+"""
 
 
 def toggle_single_alloc(request):
@@ -155,10 +175,12 @@ def toggle_single_alloc(request):
 
     # The rating after it being toggled
     toggled_rating = toggle_rating(r_pk=request.GET.get('pk', ''))
+    phase = request.GET.get('phase', '')
     student = toggled_rating.student
     team_members = Student.objects.filter(class_team=student.class_team)
 
     return render(request, 'main/search/table.html', {
         'students': team_members,
+        'phase': phase.upper(),
         'cs': (len(team_members) * 2)
     })

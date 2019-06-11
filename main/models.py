@@ -116,7 +116,7 @@ def get_score_from_rating(func, *args, **kwargs):
 def get_score(student, allocator, phase):
     # Returns 1 number the rating given to a student by an allocator
 
-    phase = Phase.objects.get(phase=phase)
+    phase = Phase.objects.get(pk=phase)
     score = Rating.objects.filter(
         student=student,
         allocator=allocator,
@@ -130,7 +130,7 @@ def get_score(student, allocator, phase):
 
 
 def get_raw_rating(student, allocator, phase):
-    phase = Phase.objects.get(phase=phase)
+    phase = Phase.objects.get(pk=phase)
     rating = Rating.objects.filter(
         student=student,
         allocator=allocator,
@@ -140,7 +140,7 @@ def get_raw_rating(student, allocator, phase):
     return rating
 
 
-def get_team_scores(student, phase='PP'):
+def get_team_scores(student, phase=None):
 
     # a queryset of team members
     team_members = Student.objects.filter(class_team=student.class_team)
@@ -151,12 +151,12 @@ def get_team_scores(student, phase='PP'):
     return total_score, no_team_members, no_scores
 
 
-def get_limit(self, tm, limit):
-    self_score = get_score(self, self, 'PP')
+def get_limit(self, tm, limit, phase):
+    self_score = get_score(self, self, phase)
     if self_score is None:
         return False
     else:
-        total_score, _, no_scores = get_team_scores(tm, 'PP')
+        total_score, _, no_scores = get_team_scores(tm, phase)
         # probs
 
         ratio = sapa_calc(self_score, total_score, no_scores)
@@ -190,9 +190,9 @@ class Student(models.Model):
         given = p if p is None else g
         return f" {given} {s}, "
 
-    def paf(self, phase='PP'):
+    def paf(self, phase=None):
 
-        if self.class_team.team_letter is not None:
+        if self.class_team.team_letter is not None and phase is not None:
 
             # Get team score adds the scores from other team members
             total_score, no_team_members, no_scores = get_team_scores(self, phase)
@@ -205,8 +205,8 @@ class Student(models.Model):
         else:
             return None
 
-    def sapa(self, phase='PP'):
-        if self.class_team.team_letter is not None:
+    def sapa(self, phase=None):
+        if self.class_team.team_letter is not None and phase is not None:
             total_score, _, no_scores = get_team_scores(self, phase)
 
             self_score = get_score(self, self, phase)
@@ -215,16 +215,18 @@ class Student(models.Model):
                 return sapa_calc(self_score, total_score, no_scores)
             else:
                 return "SA not Justified"
+        else:
+            return None
 
-    def ratios(self):
+    def ratios(self, phase=None):
         class_team = self.class_team
         limit = class_team.limit
 
         team_members = Student.objects.filter(class_team=class_team)
-        total_score, _, no_scores = get_team_scores(self, 'PP')
+        total_score, _, no_scores = get_team_scores(self, phase)
         collector = []
         for tm in team_members:
-            self_score = get_score(self, tm, 'PP')
+            self_score = get_score(self, tm, phase)
 
             if self_score is not None:
                 ratio = sapa_calc(self_score, total_score, no_scores)
@@ -238,7 +240,7 @@ class Student(models.Model):
 
         return collector
 
-    def raw_score(self):
+    def raw_score(self, phase=None):
         """
 
         :return: A list of tuples.
@@ -250,8 +252,11 @@ class Student(models.Model):
         team_members = Student.objects.filter(class_team=class_team)
         limit = class_team.limit
 
-        return [(get_raw_rating(self, team_member, 'PP'),
-                 get_limit(self, team_member, limit)) for team_member in team_members]
+        if phase is not None:
+            return [(get_raw_rating(self, team_member, phase),
+                     get_limit(self, team_member, limit, phase)) for team_member in team_members]
+        else:
+            return None
 
     def __str__(self):
         return f"{self.surname}, {self.given_name} {'({})'.format(self.pref_name) if self.pref_name is not None else ''}"

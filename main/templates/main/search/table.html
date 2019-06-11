@@ -1,3 +1,7 @@
+{% load staticfiles %}
+{% load main_extras %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.js"></script>
+<script src="{% static '/main/js/moderation.js' %}"></script>
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -6,7 +10,6 @@
                 </th>
 
                 <th id="alloc"
-                    toggle-total-alloc-url="{% url 'toggle-total-alloc' %}"
                     toggle-single-alloc-url="{% url 'toggle-single-alloc' %}"
                     colspan="{{ cs }}">
                     Total Marks received from:
@@ -34,20 +37,6 @@
                     </td>
                 {% endfor %}
             </tr>
-            <tr>
-                {% for student in students %}
-                    <td colspan="2">
-                        <div class="form-group" >
-                            <input type="checkbox"
-                                   data-on="Use all" data-off="Discard all"
-                                   data-offstyle="danger"
-                                   data-toggle="toggle"
-                                   name="sillyscores"
-                                   id="{{ student.pk}}" checked>
-                        </div>
-                    </td>
-                {% endfor %}
-            </tr>
 
         </thead>
         <tbody>
@@ -57,12 +46,14 @@
                     {{ student }}
                 </td>
                 <td>
-                    {{ student.paf }}
+                    {% call_method student 'paf' phase %}
                 </td>
                 <td>
-                    {{ student.sapa }}
+                    {% call_method student 'sapa' phase %}
                 </td>
-                    {% for rating in student.raw_score %}
+
+                {% call_method student 'raw_score' phase as ratings %}
+                {% for rating in ratings %}
                         {% if rating.1 %}
                             <td class="poo">
                         {% else %}
@@ -91,17 +82,19 @@
                         </label>
                     </td>
                     {% endfor %}
-                    {% for ratio in student.ratios %}
-                    {% if ratio.1 %}
-                        <td class="poo">
-                    {% else %}
-                        <td>
-                    {% endif %}
-                        {{ ratio.0 }}
-                    </td>
+                    {% call_method student 'ratios' phase as ratios %}
+                    {% for ratio in ratios %}
+                        {% if ratio.1 %}
+                            <td class="poo">
+                        {% else %}
+                            <td>
+                        {% endif %}
+                            {{ ratio.0 }}
+                        </td>
                     {% endfor %}
             </tr>
           {% endfor %}
         </tbody>
 
     </table>
+
